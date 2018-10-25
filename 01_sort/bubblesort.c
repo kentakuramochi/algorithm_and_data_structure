@@ -1,8 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
-
-#define ELAPSED_SEC(cs, ce) ((double)(ce - cs) / CLOCKS_PER_SEC)
+#include "utils.h"
 
 // bubblesort
 void bubbleSort(int *array, int n)
@@ -25,43 +23,23 @@ void bubbleSort(int *array, int n)
     } while (flag == 1);
 }
 
-// fill array with random integer
-void fill_random(int *array, int n)
-{
-    srand((unsigned int)time(NULL));
-
-    for (int i = 0; i < n; i++) {
-        array[i] = rand();
-    }
-}
-
-// print all elements of array
-void print_all(int *array, int n)
-{
-    for (int i = 0; i < n; i++) {
-        printf("%d ", array[i]);
-    }
-    putchar('\n');
-}
-
 int main()
 {
-    const int N = 10000;
+    const int N = 10;
     int array[N];
+    clock_t start, end;
 
     fill_random(array, N);
 
-    printf("start ... ");
-    clock_t c_start = clock();
+    START(start);
 
     bubbleSort(array, N);
 
-    clock_t c_end = clock();
-    printf("finished\n");
+    FINISH(end);
 
     print_all(array, N);
 
-    printf("elapsed: %f[s]\n", ELAPSED_SEC(c_start, c_end));
+    printf("elapsed: %f[s]\n", ELAPSED_SEC(start, end));
 
     return 0;
 }
