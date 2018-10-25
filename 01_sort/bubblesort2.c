@@ -2,14 +2,14 @@
 #include <time.h>
 #include "utils.h"
 
-// bubblesort
-void bubbleSort(int *array, int n)
+// bubblesort (modifled)
+void bubbleSort2(int *array, int n)
 {
-    int tmp, flag;
+    int tmp, flag, j = 0;
 
     do {
         flag = 0;
-        for (int i = 0; i < n - 1; i++) {
+        for (int i = 0; i < n - 1 - j; i++) {
             // if array[i] is bigger than array[i + 1]
             if (array[i] > array[i + 1]) {
                 flag = 1;
@@ -19,6 +19,7 @@ void bubbleSort(int *array, int n)
                 array[i + 1] = tmp;
             }
         }
+        j++;
     // while no swapping
     } while (flag == 1);
 }
@@ -33,7 +34,7 @@ int main()
 
     START(start);
 
-    bubbleSort(array, N);
+    bubbleSort2(array, N);
 
     FINISH(end);
 
