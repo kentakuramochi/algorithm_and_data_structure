@@ -5,38 +5,45 @@
 // quicksort
 void quickSort(int *data, int bottom, int top)
 {
+    // if partition size <= 1, return
     if (bottom >= top) {
         return;
     }
 
-    // set a head value as a pivot
-    int pivot = data[bottom];
+    // pivot: head value
+    int *pivot = &data[bottom];
 
     int lower_idx = bottom, upper_idx = top;
     int tmp;
 
     while (lower_idx < upper_idx) {
-        while ((lower_idx <= upper_idx) && (data[lower_idx] <= pivot)) {
+        // search greater value than the pivot from head
+        while ((lower_idx <= upper_idx) && (data[lower_idx] <= *pivot)) {
             lower_idx++;
         }
-        while ((lower_idx <= upper_idx) && (data[lower_idx] > pivot)) {
+        // search lesser value than the pivot from tail
+        while ((lower_idx <= upper_idx) && (data[lower_idx] > *pivot)) {
             upper_idx--;
         }
 
         // swap
+        // move lesser value to forward and greater value to back
         if (lower_idx < upper_idx) {
             tmp = data[lower_idx];
             data[lower_idx] = data[upper_idx];
             data[upper_idx] = tmp;
         }
     }
-
-    tmp = data[bottom];
-    data[bottom] = data[upper_idx];
+    // partitioning: split data into 2 partition
+    // forward: lesser values than the pivot
+    // back: greater values than the pivot
+    tmp = *pivot;
+    *pivot = data[upper_idx];
     data[upper_idx] = tmp;
 
-    // recursion
-    quickSort(data, bottom, upper_idx -1);
+    // sort forward partition recursively
+    quickSort(data, bottom, upper_idx - 1);
+    // sort back partition too
     quickSort(data, upper_idx + 1, top);
 }
 

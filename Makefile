@@ -1,3 +1,6 @@
+# Makefile
+# usage
+#   make SRC=(main source file path)
 CC      = gcc
 CFLAGS  = -Wall -std=c11
 LDFLAGS =
@@ -12,6 +15,8 @@ OBJS    = $(SRCS:.c=.o)
 TARGET  ?= $(SRC:.c=)
 
 .PHONY: all clean
+
+all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	if [ ! -d $(BINDIR) ]; then mkdir $(BINDIR); fi
