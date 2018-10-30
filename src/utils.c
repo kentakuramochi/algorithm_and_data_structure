@@ -14,6 +14,15 @@ void fill_random(int *array, int n)
         array[i] = rand();
     }
 }
+// with upper limit
+void fill_random_under(int *array, int n, int max)
+{
+    srand((unsigned int)time(NULL));
+
+    for (int i = 0; i < n; i++) {
+        array[i] = rand() % max;
+    }
+}
 
 // print all elements of array
 void print_all(int *array, int n)

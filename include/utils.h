@@ -13,6 +13,7 @@
 
 // fill integer array with random value
 void fill_random(int *array, int n);
+void fill_random_under(int *array, int n, int max);
 
 // print all elements of array
 void print_all(int *array, int n);
