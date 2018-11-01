@@ -29,11 +29,11 @@ int main()
 
     fill_random_under(array, N, 100);
 
-    START(start);
-
     int x;
     printf("search: ");
     scanf("%d", &x);
+
+    START(start);
 
     int idx = linearSearch(x, array, N);
 
