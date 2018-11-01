@@ -4,6 +4,8 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#include <time.h>
+
 // print message and get current clock_t
 #define START(c)  { fputs("start ... ", stdin); (c) = clock(); }
 #define FINISH(c) { fputs("finished\n", stdin); (c) = clock(); }
