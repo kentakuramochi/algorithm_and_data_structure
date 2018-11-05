@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "stack.h"
 
-#define STACK_ERROR -1
+#define STACK_ERROR 0
 
 void stack_init(stack *s, int length)
 {
@@ -14,14 +14,16 @@ void stack_init(stack *s, int length)
     s->max = length;
 }
 
-void stack_push(double val, stack *s)
+int stack_push(double val, stack *s)
 {
     if (s->top == s->max) {
-        return;
+        return STACK_ERROR;
     } else {
         s->vals[s->top] = val;
         s->top++;
     }
+
+    return 1;
 }
 
 double stack_pop(stack *s)
