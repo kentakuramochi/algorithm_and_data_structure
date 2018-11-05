@@ -101,7 +101,7 @@ int searchBook(Book *books[], int size, int key)
     return NOT_FOUND;
 }
 
-int main()
+int main(void)
 {
     const int N = 10;
     Book *books[N];

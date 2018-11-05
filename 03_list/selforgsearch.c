@@ -7,7 +7,7 @@ typedef struct tagListNode {
     int data;
 } ListNode;
 
-int main()
+int main(void)
 {
     ListNode *firstNode, *lastNode, *newNode, *thisNode;
 

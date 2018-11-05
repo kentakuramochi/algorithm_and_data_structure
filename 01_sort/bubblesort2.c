@@ -24,7 +24,7 @@ void bubbleSort2(int *array, int n)
     } while (flag == 1);
 }
 
-int main()
+int main(void)
 {
     const int N = 10000;
     int array[N];

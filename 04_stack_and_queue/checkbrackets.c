@@ -88,7 +88,7 @@ int check_bracket(int type, int line, int carryover)
     return 1;
 }
 
-int main()
+int main(void)
 {
     // stack
     char buffer[STACK_LENGTH];

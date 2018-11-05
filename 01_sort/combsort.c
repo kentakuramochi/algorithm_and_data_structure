@@ -31,7 +31,7 @@ void combSort(int *data, int n, double k)
     } while ((gap > 1) || (flag != 1));
 }
 
-int main()
+int main(void)
 {
     const int N = 10000;
     int array[N];

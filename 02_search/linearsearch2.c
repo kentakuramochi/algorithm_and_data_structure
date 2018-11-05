@@ -31,7 +31,7 @@ int linearSearch(int x, int *data, int n)
     return NOT_FOUND;
 }
 
-int main()
+int main(void)
 {
     const int N = 10000;
     int array[N];

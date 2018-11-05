@@ -47,7 +47,7 @@ void quickSort(int *data, int bottom, int top)
     quickSort(data, upper_idx + 1, top);
 }
 
-int main()
+int main(void)
 {
     const int N = 10000;
     int array[N];

@@ -28,7 +28,7 @@ int selfOrganizationSearch(int x, int *data, int num)
     return NOT_FOUND;
 }
 
-int main()
+int main(void)
 {
     const int N = 10000;
     const int MAX = 100;

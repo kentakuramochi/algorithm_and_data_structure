@@ -36,7 +36,7 @@ void mergeSort(int *data, int *buffer, int n)
     }
 }
 
-int main()
+int main(void)
 {
     const int N = 10000;
     int array[N];

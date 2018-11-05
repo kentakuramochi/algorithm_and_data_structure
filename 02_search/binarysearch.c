@@ -28,7 +28,7 @@ int binarySearch(int x, int *data, int left, int right)
     return NOT_FOUND;
 }
 
-int main()
+int main(void)
 {
     const int N = 10000;
     int array[N];
