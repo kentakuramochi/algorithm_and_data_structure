@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-// binary tree node
+// binary tree node of string
 typedef struct _tag_tree_node {
-    int value;
+    char *key;
+    char *val;
     struct _tag_tree_node *left;
     struct _tag_tree_node *right;
 } tree_node;
@@ -12,14 +14,22 @@ typedef struct _tag_tree_node {
 tree_node *tree_root = NULL;
 
 // create new node
-tree_node *create_new_node(int num)
+tree_node *create_new_node(char* key, char* val)
 {
     tree_node *tree_new = (tree_node*)malloc(sizeof(tree_node));
     if (tree_new == NULL) {
         exit(EXIT_FAILURE);
     }
 
-    tree_new->value = num;
+    // allocate (strlen(key)+1) Byte for NULL termination
+    tree_new->key = (char*)malloc(sizeof(char) * strlen(key) + 1);
+    tree_new->val = (char*)malloc(sizeof(char) * strlen(val) + 1);
+    if ((tree_new->key == NULL) || (tree_new->val == NULL)) {
+        exit(EXIT_FAILURE);
+    }
+    strcpy(tree_new->key, key);
+    strcpy(tree_new->val, val);
+
     tree_new->left = NULL;
     tree_new->right = NULL;
 
@@ -27,72 +37,71 @@ tree_node *create_new_node(int num)
 }
 
 // insert new node
-void insert_tree(int num, tree_node *node)
+void insert_tree(char *key, char *val, tree_node *node)
 {
     if (node == NULL) {
-        tree_root = create_new_node(num);
+        tree_root = create_new_node(key, val);
         return;
     }
 
     // compare and insert
-    if (node->value > num) {
+    if (strcmp(node->key, key) > 0) {
         if (node->left != NULL) {
-            insert_tree(num, node->left);
+            insert_tree(key, val, node->left);
         } else {
             // insert to left node
-            node->left = create_new_node(num);
+            node->left = create_new_node(key, val);
         }
     } else {
         if (node->right != NULL) {
-            insert_tree(num, node->right);
+            insert_tree(key, val, node->right);
         } else {
             // insert to right node
-            node->right = create_new_node(num);
+            node->right = create_new_node(key, val);
         }
     }
 
     return;
 }
 
-// find value from tree
-tree_node *find_value(int val, tree_node *node)
+// find node with key
+tree_node *find_key(char *key, tree_node *node)
 {
     // compare and find
-    if (node->value > val) {
+    int cmp = strcmp(node->key, key);
+
+    if (cmp > 0) {
         if (node->left != NULL) {
             return NULL;
         }
 
-        return find_value(val, node->left);
+        return find_key(key, node->left);
     }
-    if (node->value < val) {
+    if (cmp < 0) {
         if (node->right != NULL) {
             return NULL;
         }
 
-        return find_value(val, node->right);
+        return find_key(key, node->right);
     }
 
     // find: return node
     return node;
 }
 
-// remove value
-int remove_tree(int val)
+// remove value with key
+int remove_tree(char *key)
 {
-    tree_node *node, *parent_node;
+    tree_node *node = tree_root, *parent_node = NULL;
     tree_node *left_biggest;
     // -1: left of parent, 1: right of parent
     // 0: root
-    int dir;
-
-    node = tree_root;
-    parent_node = NULL;
-    dir = 0;
+    int dir = 0, cmp;
 
     // find value
-    while ((node != NULL) && (node->value != val)) {
-        if (node->value > val) {
+    while ((node != NULL) &&
+           ((cmp = strcmp(node->key, key))!=0)) {
+        if (cmp > 0) {
             parent_node = node;
             node = node->left;
             dir = -1;
@@ -134,6 +143,7 @@ int remove_tree(int val)
             }
         }
 
+        free(node->key);
         free(node);
     } else {
         // if both of child nodes exist,
@@ -149,7 +159,8 @@ int remove_tree(int val)
             dir = 1;
         }
 
-        node->value = left_biggest->value;
+        free(node->key);
+        node->key = left_biggest->key;
         if (dir == -1) {
             parent_node->left = left_biggest->left;
         } else {
@@ -175,7 +186,7 @@ void print_tree(int depth, tree_node *node)
         printf(" ");
     }
 
-    printf("%d\n", node->value);
+    printf("%s:%s\n", node->key, node->val);
 
     print_tree(depth + 1, node->right);
 }
@@ -191,55 +202,64 @@ void free_tree(tree_node *node)
     free_tree(node->left);
     free_tree(node->right);
 
+    free(node->key);
+    free(node->val);
     free(node);
 }
 
 int main(void)
 {
-    int i, action;
+    int i;
+    char tmp[256], tmpval[256];
+    tree_node *node_found;
 
-    // insert random values
-    for (i = 0; i < 10; i++) {
-        insert_tree(rand() % 99 + 1, tree_root);
-    }
-
-    // operation with binary tree
+    // operation with binary tree map
     for (;;) {
         print_tree(0, tree_root);
         printf("Operation:\n");
-        printf("1: add 2: search 3: remove other: exit\n> ");
-        scanf("%d", &action);
+        printf("0: exit 1: add 2: search 3: remove\n> ");
+        scanf("%d", &i);
 
-        switch (action) {
+        if (i == 0) {
+            break;
+        }
+
+        switch (i) {
             case 1:
-                printf("add value (1~100) > ");
-                scanf("%d", &i);
-                if ((i < 1) || (i > 100)) {
-                    continue;
-                }
-                insert_tree(i, tree_root);
+                printf("key > ");
+                scanf("%s", tmp);
+                printf("val > ");
+                scanf("%s", tmpval);
+
+                insert_tree(tmp, tmpval, tree_root);
                 break;
             case 2:
-                printf("search value (1~100) > ");
-                scanf("%d", &i);
-                if (find_value(i, tree_root) != NULL) {
-                    printf("found\n");
+                printf("key > ");
+                scanf("%s", tmp);
+
+                node_found = find_key(tmp, tree_root);
+                if (node_found != NULL) {
+                    printf("found val:%s\n", node_found->val);
                 } else {
                     printf("not found\n");
                 }
                 break;
             case 3:
-                printf("remove value (1~100) > ");
-                scanf("%d", &i);
-                if (remove_tree(i) == 1) {
-                    printf("delete %d\n", i);
+                printf("key > ");
+                scanf("%s", tmp);
+
+                if (remove_tree(tmp) == 1) {
+                    printf("delete %s\n", tmp);
                 } else {
                     printf("not found\n");
                 }
                 break;
             default:
-                free_tree(tree_root);
-                return EXIT_SUCCESS;
+                break;
         }
     }
+
+    free_tree(tree_root);
+
+    return EXIT_SUCCESS;
 }
