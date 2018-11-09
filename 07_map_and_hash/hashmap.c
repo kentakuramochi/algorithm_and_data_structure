@@ -8,13 +8,13 @@ typedef struct {
     char *japanese;
 } Wordset;
 
-// hashtable
+// hash table
 typedef struct {
     Wordset **data;
     unsigned int size;
 } Hashtable;
 
-// hash function
+// hash function #1
 // hash = (sum of ASCII code of string) % MAX
 unsigned int hashFunc1(char *str, unsigned int hashMax)
 {
@@ -27,8 +27,10 @@ unsigned int hashFunc1(char *str, unsigned int hashMax)
 
     return hash % hashMax;
 }
-// hash = (str[0]*16^0 + str[1]*16^1 + ...
-//         + str[7]*16^7 + str[8]*16^0 + ...) % MAX
+
+// hash function #2
+// hash = (str[0]*16^0 + str[1]*16^1 + ... +
+//         str[7]*16^7 + str[8]*16^0 + ...) % MAX
 unsigned int hashFunc2(char* str, unsigned int hashMax)
 {
     unsigned int n, length, hash, weight;
@@ -45,11 +47,13 @@ unsigned int hashFunc2(char* str, unsigned int hashMax)
 }
 
 // rehash
+// when the hash conflicts, calculate hash again
 unsigned int rehash(Hashtable *hashtable, unsigned int firsthash)
 {
     unsigned int hash, k;
 
-    for (k = 1; k <= hashtable->size / 2; k++) {
+    for (k = 1; k <= (hashtable->size / 2); k++) {
+        // rehash on hash+1, hash+4, ... hash+(size/2)^2
         hash = (firsthash + k * k) % hashtable->size;
         if (hashtable->data[hash] == NULL) {
             return hash;
@@ -69,11 +73,14 @@ void addDataToMap(Hashtable *hashtable, Wordset *newdata)
     if (hashtable->data[hash] != NULL) {
         hash = rehash(hashtable, hash);
 
+        // failed to rehash
         if (hash == -1) {
             printf("no space on hashmap to add \"%s\"\n", newdata->english);
             return;
         }
     }
+
+    hashtable->data[hash] = newdata;
 }
 
 // find data
@@ -84,29 +91,32 @@ char *getDataFromMap(Hashtable *hashtable, char *key)
 
     hash = hashFunc2(key, hashtable->size);
 
-    for (k = 0; k <= hashtable->size /2; k++) {
+    // search hash, hash+1, hash+4, ... , hash+(size/2)^2
+    for (k = 0; k <= (hashtable->size /2); k++) {
         word = hashtable->data[(hash + k * k) % hashtable->size];
-        if (word == NULL) {
+        if (word != NULL) {
+            // compare string
             if (strcmp(key, word->english) == 0) {
                 return word->japanese;
             }
         }
     }
 
+    // not found
     return NULL;
 }
 
 // remove data
-Wordset *deleteDataFromMap(Hashtable *hashtable, char *key)
+Wordset *removeDataFromMap(Hashtable *hashtable, char *key)
 {
     unsigned int hash, k;
     Wordset *word;
 
     hash = hashFunc2(key, hashtable->size);
 
-    for (k = 0; k <= hashtable->size / 2; k++) {
+    for (k = 0; k <= (hashtable->size / 2); k++) {
         word = hashtable->data[(hash + k * k) % hashtable->size];
-        if (word == NULL) {
+        if (word != NULL) {
             if (strcmp(key, word->english) == 0) {
                 hashtable->data[(hash + k * k) % hashtable->size] = NULL;
                 return word;
@@ -114,14 +124,21 @@ Wordset *deleteDataFromMap(Hashtable *hashtable, char *key)
         }
     }
 
+    // not found
     return NULL;
 }
 
-// init hashtable with specified size
+// init hashtable with specified size (prime number is good)
 void initHashtable(Hashtable *hashtable, unsigned int size)
 {
+    int i;
     hashtable->data = (Wordset**)malloc(sizeof(Wordset*) * size);
-    memset(hashtable->data, NULL, sizeof(Wordset*) * size);
+
+    // memset sets (unsigned char) data
+    //memset(hashtable->data, NULL, sizeof(Wordset*) * size);
+    for (i = 0; i < size; i++) {
+        hashtable->data[i] = NULL;
+    }
 
     hashtable->size = size;
 }
@@ -139,7 +156,9 @@ void printAllData(Hashtable *hashtable)
     unsigned int n;
     for (n = 0; n < hashtable->size; n++) {
         if (hashtable->data[n] != NULL) {
-            printf("%d: [%s] %s\n", n, hashtable->data[n]->english, hashtable->data[n]->japanese);
+            printf("%04d: [%s]\t%s\n", n,
+                    hashtable->data[n]->english,
+                    hashtable->data[n]->japanese);
         }
     }
 }
@@ -156,11 +175,11 @@ int main(void)
         {"beluga",  "シロイルカ"},
         {"grampus", "シャチ"},
         {"medusa",  "クラゲ"},
-        {"otter",   "カワウソ"},
+        {"otter",   "カワウソ"}
     };
 
+    // init and add word data
     initHashtable(&hashtable, 503);
-
     for (n = 0; n < 5; n++) {
         addDataToMap(&hashtable, &words[n]);
     }
@@ -173,26 +192,31 @@ int main(void)
         scanf("%d", &n);
 
         switch (n) {
+            // search
             case 1:
-                printf("search word (English) > ");
+                printf("search English word > ");
                 scanf("%s", key);
+
                 japanese = getDataFromMap(&hashtable, key);
                 if (japanese != NULL) {
-                    printf("%s in Japanese: %s", key, japanese);
+                    printf("\"%s\" in Japanese: \"%s\"\n", key, japanese);
                 } else {
                     printf("not found\n");
                 }
                 break;
+            // remove
             case 2:
-                printf("remove word (English) > ");
+                printf("remove English word > ");
                 scanf("%s", key);
-                wordfound = deleteDataFromMap(&hashtable, key);
+
+                wordfound = removeDataFromMap(&hashtable, key);
                 if (wordfound != NULL) {
-                    printf("remove %s from map\n", key);
+                    printf("remove \"%s\" from map\n", key);
                 } else {
                     printf("not found\n");
                 }
                 break;
+            // print
             case 3:
                 printAllData(&hashtable);
                 break;
