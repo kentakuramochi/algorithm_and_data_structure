@@ -4,7 +4,7 @@
 // previous patterns and queue
 typedef struct tagPattern {
     unsigned long hash;  // hash value
-    int pattern_from;    // the pattern which is derived from
+    int pattern_from;    // pattern
 } Pattern;
 
 Pattern *history;
@@ -14,6 +14,10 @@ int history_count = 0;
 int queue_bottom;
 
 // make hash corresponding to pattern
+// pattern[i]: 0(0x00) ~ 7(0x07)
+// gather 4bit number*8 with 32(+4)bit integer
+// pattern[0]  [1]  [2]  [3]  [4]  [5]  [6]  [7]
+// hash = 0000|0000|0000|0000|0000|0000|0000|0000
 unsigned long make_hash(char *pattern)
 {
     unsigned long hash;
@@ -28,6 +32,7 @@ unsigned long make_hash(char *pattern)
 }
 
 // retrieve pattern from hash
+// divide hash into 4bit block 0(0x00) ~ 7(0x07)
 void pattern_from_hash(char *pattern, unsigned long hash)
 {
     int i;
@@ -36,23 +41,24 @@ void pattern_from_hash(char *pattern, unsigned long hash)
     }
 }
 
+// save pattern history
 void save_history(char *pattern, int pattern_from)
 {
     int i;
     unsigned long hash;
 
-    // create new pattern
+    // create new hash
     hash = make_hash(pattern);
 
-    // compare with prevous patterns
+    // compare with prevous hashes
     for (i = 0; i < history_count; i++) {
-        // if matched, don't evaluate
+        // if matched, don't save
         if (history[i].hash == hash) {
             return;
         }
     }
 
-    // save new pattern
+    // append new pattern to history
     history_count++;
     history = (Pattern*)realloc(history, sizeof(Pattern) * (history_count));
 
@@ -72,34 +78,46 @@ int solve_7puzzle(void)
     int blank_pos;
     unsigned long hash;
     // panels
-    // each index represent position as follows
+    // index represent position as follows
     // 0 1 2 3
     // 4 5 6 7
     char pattern[8];
 
     queue_bottom = 0;
-    // until queue is empty
+
+    // breadth-first search
+    // search all patterns can be considered at next 1 turn
+    // until all pattern was checked
     while (queue_bottom != history_count) {
         // get from queue
         hash = history[queue_bottom].hash;
 
-        // reach to answer
+        // panels line correctly
         if (hash == 0x12345670) {
             return 1;
         }
 
         pattern_from_hash(pattern, hash);
+        // get blank position
         for (blank_pos = 0; blank_pos < 8; blank_pos++) {
             if (pattern[blank_pos] == 0) {
                 break;
             }
         }
 
+        // panel index:
+        // 0 1 2 3
+        // 4 5 6 7
+        // move up: index-4
+        // move down: index+4
+        // move left: index-1
+        // move right: index+1
         if (blank_pos > 3) {
             // move panel from upper
             pattern[blank_pos] = pattern[blank_pos - 4];
             pattern[blank_pos - 4] = 0;
             save_history(pattern, queue_bottom);
+            // recovery pattern
             pattern_from_hash(pattern, hash);
         }
         if (blank_pos < 4) {
@@ -107,6 +125,7 @@ int solve_7puzzle(void)
             pattern[blank_pos] = pattern[blank_pos + 4];
             pattern[blank_pos + 4] = 0;
             save_history(pattern, queue_bottom);
+            // recovery pattern
             pattern_from_hash(pattern, hash);
         }
         if ((blank_pos != 0) && (blank_pos != 4)) {
@@ -114,6 +133,7 @@ int solve_7puzzle(void)
             pattern[blank_pos] = pattern[blank_pos - 1];
             pattern[blank_pos - 1] = 0;
             save_history(pattern, queue_bottom);
+            // recovery pattern
             pattern_from_hash(pattern, hash);
         }
         if ((blank_pos != 3) && (blank_pos != 7)) {
@@ -143,16 +163,17 @@ int main(void)
     if (solve_7puzzle() == 0) {
         printf("the anser was not found\n");
     } else {
-        // print the answer
         last = -1;
 
         while (last != queue_bottom) {
+            // display answer from first
             for (i = queue_bottom; history[i].pattern_from != last;) {
                 i = history[i].pattern_from;
             }
             last = i;
 
-            // print states from first
+            // print panel
+            printf("pattern: %d\n", last);
             pattern_from_hash(pattern, history[last].hash);
             for (i = 0; i < 8; i++) {
                 printf("%c ", (pattern[i] ? (pattern[i] + '0') : ' '));
@@ -160,7 +181,7 @@ int main(void)
                     printf("\n");
                 }
             }
-            // wait input '\n'
+            // wait
             getchar();
         }
     }
