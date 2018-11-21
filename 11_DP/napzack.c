@@ -28,6 +28,7 @@ int main(void)
         for (j = size[i]; j < NAP_SIZE + 1; j++) {
             new_value = nap_value[j - size[i]] + value[i];
 
+            // if the value is higher, pack item[i]
             if (new_value > nap_value[j]) {
                 nap_value[j] = new_value;
             }
