@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 // num of data
 #define N 10
@@ -11,7 +12,7 @@
 const int value[N] = { 15, 3, 7, 6, 10, 4, 13, 2, 3, 6 };
 
 // max macro
-#define MAX(a, b)(((a) > (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 // solve the best separation with table
 // table cell
@@ -25,18 +26,17 @@ int main(void)
     cell solutions[N][SEPARATOR + 1];
     int i, j, s, sum;
 
-    // from back of table
+    // from tail of values
     for (i = N - 1; i >= 0; i--) {
-        printf("%d\n", i);
+        // check sum of each group with adding separator
         for (j = 0; j < SEPARATOR + 1; j++) {
             solutions[i][j].num = 0;
             for (sum = 0, s = i; s < N; s++) {
-                printf("%d\n", s);
                 sum += value[s];
                 if (j == 0 || i == N - 1 || solutions[i][j].num == 0
                     || (s != N - 1 && solutions[i][j].solution > MAX(sum, solutions[s + 1][j - 1].solution))) {
                     // if first column/last column, do nothing
-                    if (j = 0 || i == N - 1) {
+                    if (j == 0 || i == N - 1) {
                         solutions[i][j].solution = sum;
                     // save better solution
                     } else {
@@ -49,9 +49,15 @@ int main(void)
     }
 
     // display table
+    printf("separator");
+    for (i = 0; i < N; i++) {
+        printf("%6d ", value[i]);
+    }
+    printf("\n");
     for (j = 0; j < SEPARATOR + 1; j++) {
+        printf("%8d ", j);
         for (i = 0; i < N; i++) {
-            printf("%2d, %2d ", solutions[i][j].num, solutions[i][j].solution);
+            printf("(%2d,%2d)", solutions[i][j].num, solutions[i][j].solution);
         }
         printf("\n");
     }
@@ -61,6 +67,7 @@ int main(void)
         printf("[%d] ", solutions[i][j].num);
         i += solutions[i][j].num;
     }
+    printf("\n");
 
     return EXIT_SUCCESS;
 }

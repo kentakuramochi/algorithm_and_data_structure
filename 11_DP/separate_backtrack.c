@@ -18,7 +18,7 @@ int best_sep_max_value = INT_MAX;
 // separate values into groups
 void separate(int pos, int num)
 {
-    int i, j, k, start, end, max;
+    int i, j, sum, start, end, max;
 
     // set separator
     sep_pos[num++] = pos;
@@ -27,20 +27,20 @@ void separate(int pos, int num)
     if (num == SEPARATOR) {
         max = 0;
 
-        // calculate max of sum of each group
+        // calculate max of sum of each group: value[sep_pos[i - 1]] to value[sep_pos[i]]
         for (i = 0; i <= SEPARATOR; i++) {
             start = (i == 0) ? 0 : sep_pos[i - 1];
             end = (i == SEPARATOR) ? N : sep_pos[i];
-            k = 0;
+            sum = 0;
             for (j = start; j < end; j++) {
-                k += value[j];
+                sum += value[j];
             }
-            if (k > max) {
-                max = k;
+            if (sum > max) {
+                max = sum;
             }
         }
 
-        // if max of each sum is less than the current max, save the value
+        // if max of each sum is less than the current max, save the position
         if (max < best_sep_max_value) {
             best_sep_max_value = max;
             for (i = 0; i < SEPARATOR; i++) {
@@ -60,6 +60,12 @@ void separate(int pos, int num)
 int main(void)
 {
     int i, j, start, end;
+
+    printf("values: ");
+    for (i = 0; i < N; i++) {
+        printf("%d ", value[i]);
+    }
+    printf("\n\n");
 
     // separate from head
     for (i = 0; i < (N - SEPARATOR); i++) {
