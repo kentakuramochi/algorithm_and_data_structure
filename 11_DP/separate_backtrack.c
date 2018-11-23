@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "utils.h"
 
 #define N 10
 #define SEPARATOR 3
@@ -60,19 +61,24 @@ void separate(int pos, int num)
 int main(void)
 {
     int i, j, start, end;
+    clock_t c_start, c_finish;
 
-    printf("values: ");
-    for (i = 0; i < N; i++) {
-        printf("%d ", value[i]);
-    }
-    printf("\n\n");
+    START(c_start);
 
     // separate from head
     for (i = 0; i < (N - SEPARATOR); i++) {
         separate(i, 0);
     }
 
+    FINISH(c_finish);
+    printf("elapsed: %f[s]\n", ELAPSED_SEC(c_start, c_finish));
+
     // print separation
+    printf("values: ");
+    for (i = 0; i < N; i++) {
+        printf("%d ", value[i]);
+    }
+    printf("\n\n");
     for (i = 0; i <= SEPARATOR; i++) {
         start = (i == 0) ? 0 : best_sep_pos[i - 1];
         end = (i == SEPARATOR) ? N : best_sep_pos[i];

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include "utils.h"
 
 // num of data
 #define N 10
@@ -18,13 +18,16 @@ const int value[N] = { 15, 3, 7, 6, 10, 4, 13, 2, 3, 6 };
 // table cell
 typedef struct {
     int solution; // best solution
-    int num;      // num of separation
+    int num;      // num of values in group
 } cell;
 
 int main(void)
 {
     cell solutions[N][SEPARATOR + 1];
     int i, j, s, sum;
+    clock_t start, finish;
+
+    START(start);
 
     // from tail of values
     for (i = N - 1; i >= 0; i--) {
@@ -35,10 +38,10 @@ int main(void)
                 sum += value[s];
                 if (j == 0 || i == N - 1 || solutions[i][j].num == 0
                     || (s != N - 1 && solutions[i][j].solution > MAX(sum, solutions[s + 1][j - 1].solution))) {
-                    // if first column/last column, do nothing
+                    // if first column/last row, the best solution is sum
                     if (j == 0 || i == N - 1) {
                         solutions[i][j].solution = sum;
-                    // save better solution
+                    // compare and save better solution
                     } else {
                         solutions[i][j].solution = MAX(sum, solutions[s + 1][j - 1].solution);
                     }
@@ -47,6 +50,9 @@ int main(void)
             }
         }
     }
+
+    FINISH(finish);
+    printf("elapsed: %f[s]\n", ELAPSED_SEC(start, finish));
 
     // display table
     printf("separator");
