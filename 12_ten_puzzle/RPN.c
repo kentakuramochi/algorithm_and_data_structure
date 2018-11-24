@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 10
-
 // fraction
-// to avoid comuplational errors, denominator and numerator is saved separately
-// until output result
+// to avoid comuplational errors, denominator and numerator is saved individually
+// until result is output
 typedef struct {
     int denom; // denominator
     int numer; // numerator
 } Fraction;
 
+// stack info
+#define N 10
 Fraction stack[N];
 int stack_top = 0;
 
@@ -38,6 +38,43 @@ void pop(Fraction *ret)
         exit(EXIT_FAILURE);
     }
 }
+
+// parse operator and calculate with 2 operand
+void calc(const char op, Fraction *st1, Fraction *st2)
+{
+    switch (op) {
+        case '+':
+            st2->numer = st2->numer * st1->denom + st1->numer * st2->denom;
+            st2->denom = st1->denom * st2->denom;
+            break;
+        case '-':
+            st2->numer = st2->numer * st1->denom - st1->numer * st2->denom;
+            st2->denom = st1->denom * st2->denom;
+            break;
+        case '*':
+            st2->numer = st2->numer * st1->numer;
+            st2->denom = st1->denom * st2->denom;
+            break;
+        case '/':
+            // convert division to multiplication
+            st2->numer = st2->numer * st1->denom;
+            st2->denom = st2->denom * st1->numer;
+            // zero division error
+            if (st2->denom == 0) {
+                printf("error: divide by zero\n");
+                exit(EXIT_FAILURE);
+            }
+            break;
+        default:
+            printf("error: invalid character was input\n");
+            exit(EXIT_FAILURE);
+            break;
+    }
+
+    // push result to stack
+    push(st2);
+}
+
 int main(void)
 {
     char line[256];
@@ -49,38 +86,16 @@ int main(void)
 
     c = 0;
     while (line[c] != '\0') {
+        // push integer as operand
         if (line[c] >= '0' && line[c] <= '9') {
-            st1.denom = 1;
+            st1.denom = 1;  // integer
             st1.numer = line[c] - '0';
             push(&st1);
+        // parse and calculate +, -, *, /
         } else {
             pop(&st1);
             pop(&st2);
-
-            if (line[c] == '+') {
-                st2.numer = st2.numer * st1.denom + st1.numer * st2.denom;
-                st2.denom = st1.denom * st2.denom;
-                push(&st2);
-            } else if (line[c] == '-') {
-                st2.numer = st2.numer * st1.denom - st1.numer * st2.denom;
-                st2.denom = st1.denom * st2.denom;
-                push(&st2);
-            } else if (line[c] == '*') {
-                st2.numer = st2.numer * st1.numer;
-                st2.denom = st1.denom * st2.denom;
-                push(&st2);
-            } else if (line[c] == '/') {
-                st2.numer = st2.numer * st1.denom;
-                st2.denom = st2.denom * st1.numer;
-                if (st2.denom == 0) {
-                    printf("error: divide by zero\n");
-                    exit(EXIT_FAILURE);
-                }
-                push(&st2);
-            } else {
-                printf("error: invalid character was input\n");
-                exit(EXIT_FAILURE);
-            }
+            calc(line[c], &st1, &st2);
         }
         c++;
     }
