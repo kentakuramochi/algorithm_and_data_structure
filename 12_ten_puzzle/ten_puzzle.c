@@ -4,7 +4,7 @@
 // 4 numbers
 char numbers[5];
 // RPN formula: 4 numbers + 3 operators + '\0'
-char formula[4 + 3 + 1];
+char formula[8];
 
 // fraction
 // to avoid comuplational errors, denominator and numerator is saved individually
@@ -15,13 +15,12 @@ typedef struct {
 } Fraction;
 
 // stack info
-#define N 10
-Fraction stack[N];
-int stack_top = 0;
+Fraction stack[4];
+int stack_top;
 
 void push(Fraction *value)
 {
-    if (stack_top != N) {
+    if (stack_top != 4) {
         stack[stack_top].denom = value->denom;
         stack[stack_top].numer = value->numer;
         stack_top++;
@@ -45,7 +44,7 @@ void pop(Fraction *ret)
 }
 
 // parse operator and calculate with 2 operand
-void calc(const char op, Fraction *st1, Fraction *st2)
+int calc(const char op, Fraction *st1, Fraction *st2)
 {
     switch (op) {
         case '+':
@@ -66,8 +65,9 @@ void calc(const char op, Fraction *st1, Fraction *st2)
             st2->denom = st2->denom * st1->numer;
             // zero division error
             if (st2->denom == 0) {
-                printf("error: divide by zero\n");
-                exit(EXIT_FAILURE);
+                //printf("error: divide by zero\n");
+                //exit(EXIT_FAILURE);
+                return 0;
             }
             break;
         default:
@@ -78,6 +78,8 @@ void calc(const char op, Fraction *st1, Fraction *st2)
 
     // push result to stack
     push(st2);
+
+    return 1;
 }
 
 int solve(void)
@@ -85,6 +87,7 @@ int solve(void)
     int c;
     Fraction st1, st2;
 
+    stack_top = 0;
     c = 0;
     while (formula[c] != '\0') {
         // push integer as operand
@@ -96,7 +99,9 @@ int solve(void)
         } else {
             pop(&st1);
             pop(&st2);
-            calc(formula[c], &st1, &st2);
+            if (!calc(formula[c], &st1, &st2)) {
+                return 0;
+            }
         }
         c++;
     }
@@ -121,7 +126,6 @@ int make_rpn(int num, int op)
     // finish create formula
     if (num + op == 7) {
         formula[7] = '\0';
-        //printf("%s\n", formula);
         if (solve()) {
             return 1;
         }
@@ -167,28 +171,27 @@ int make_rpn(int num, int op)
     return 0;
 }
 
-void make_num(int digit, int num)
+int main(void)
 {
-    int i;
-    if (digit == 4) {
+    int i, nin[4];
+
+    while (1) {
+        printf("*** ten puzzle ***\n");
+        printf("input four numbers (0~9)\n");
+
+        for (i = 0; i < 4; i++) {
+            printf("num %d > ", i + 1);
+            scanf("%d", &nin[i]);
+            numbers[i] = nin[i] + '0';
+        }
         numbers[4] = '\0';
+
         if (make_rpn(0, 0)) {
             printf("%s: %s\n", numbers, formula);
         } else {
             printf("%s: cannot solve\n", numbers);
         }
-        return;
     }
-
-    for (i = num; i <= 9; i++) {
-        numbers[digit] = i + '0';
-        make_num(digit + 1, i);
-    }
-}
-
-int main(void)
-{
-    make_num(0, 0);
 
     return EXIT_SUCCESS;
 }

@@ -11,5 +11,4 @@
 - CPU: Intel Core i5-2520M (x86_64)
 - OS: Ubunt18.04 LTS 64bit
 - RAM: 8GB
-- gcc 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04) 
-- g++ 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04) 
+- gcc 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04)
